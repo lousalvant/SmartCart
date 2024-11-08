@@ -55,7 +55,7 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 * Required User Feature: User can select a specific grocery store.
 * Required User Feature: User can set a budget for the shopping trip.
 * Required User Feature: User can access and modify their grocery list before starting.
-- [ ] Scan/Manual Entry Screen
+- [ ] Shopping Screen
 * Required User Feature: User can scan a price tag to capture the item’s price.
 * Required User Feature: User can manually enter the price of an item if scanning is unavailable.
 * Required User Feature: User can view a running total with tax included.
@@ -75,20 +75,22 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 
 
 - [ ] First tab, Home Screen
-- [ ] Second tab, Start Shopping/Settings screen
-- [ ] Third tab, Cart Summary Screen
-- [ ] Fourth tab, Spending History screen
+- [ ] Second tab, Settings Screen
+- [ ] Third tab, Shopping Screen
+- [ ] Fourth tab, Cart Summary Screen
+- [ ] Fifth tab, Spending History screen
 
 **Flow Navigation** (Screen to Screen)
 
-- [ ] Login Screen
-  * Leads to Home Screen after successful login
+- [ ] Login/Sign Up Screen
+  * Leads to Home Screen after successful login/sign up.
 - [ ] Home Screen
-  * Leads to Overall Setting Screen (to set budget, list, and store) through a "Start Shopping" button.
+  * Leads to Settings Screen (to set budget, list, and store) through a "Start Shopping" button.
   * Leads to Spending History Screen to view the breakdown of overall grocery spending
-- [ ] Overall Setting Screen
-* Leads to Scan/Manual Entry Screen after the user sets the store, budget, and grocery list
-- [ ] Scan/Manual Entry Screen
+- [ ] Settings Screen
+* Leads to Shopping Screen after the user sets the store, budget, and grocery list
+- [ ] Shopping Screen
+* Leads to Scan/Manual entry screen
 * Leads to Cart Summary Screen after adding items to the cart
 - [ ] Cart Summary Screen
 * Leads back to Home Screen after viewing the itemized cart breakdown
@@ -98,7 +100,7 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 
 ## Wireframes
 
-[Add picture of your hand sketched wireframes in this section]
+![](https://imgur.com/jKc7Fxh)
 
 ## Schema 
 
@@ -145,12 +147,12 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 - [GET] /spending_history - Fetch user's monthly spending history.
 - [GET] /shopping_sessions - Retrieve active or recent shopping sessions.
 
-#### Overall Setting Screen
+#### Settings Screen
 
 - [POST] /shopping_session - Create a new shopping session with store name, budget, and list.
 - [GET] /grocery_list - Retrieve user’s saved grocery list for the session.
 
-#### Scan/Manual Entry Screen
+#### Shopping Screen
 
 - [POST] /grocery_item - Add an item to the current shopping session.
 - [GET] /shopping_session/total - Fetch the running total of the shopping session, including tax.
