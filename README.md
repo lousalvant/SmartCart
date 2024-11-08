@@ -28,20 +28,21 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 
 **Required Must-have Stories**
 
-* User can scan a price tag to capture the item’s price.
-* User can manually enter the price of an item if scanning is unavailable.
-* User can view a real-time total of all items in the cart, including tax based on location.
-* User can set a budget for the shopping trip.
-* User receives an alert when the total cost is approaching or exceeding their set budget.
+- [ ] User can log in or register for an account.
+- [ ] User can scan a price tag to capture the item’s price.
+- [ ] User can manually enter the price of an item if scanning is unavailable.
+- [ ] User can view a real-time total of all items in the cart, including tax based on location.
+- [ ] User can set a budget for the shopping trip.
+- [ ] User receives an alert when the total cost is approaching or exceeding their set budget.
 
 **Optional Nice-to-have Stories**
 
-* User can view a breakdown of items added to the cart, including price, quantity, and tax.
-* User can categorize items (e.g., groceries, household supplies) for better tracking.
-* User can save a shopping list and access it during future trips.
-* User can view a summary of past shopping trips and total expenditures.
-* User can share their cart total or shopping list with others.
-* User can apply discounts or coupons to specific items to see updated totals.
+- [ ] User can view a breakdown of items added to the cart, including price, quantity, and tax.
+- [ ] User can categorize items (e.g., groceries, household supplies) for better tracking.
+- [ ] User can save a shopping list and access it during future trips.
+- [ ] User can view a summary of past shopping trips and total expenditures.
+- [ ] User can share their cart total or shopping list with others.
+- [ ] User can apply discounts or coupons to specific items to see updated totals.
 
 ### 2. Screen Archetypes
 
