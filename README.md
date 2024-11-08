@@ -100,7 +100,7 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 
 ## Wireframes
 
-![](https://imgur.com/jKc7Fxh)
+![](https://i.imgur.com/jKc7Fxh.png)
 
 ## Schema 
 
