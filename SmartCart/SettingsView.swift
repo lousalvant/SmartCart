@@ -87,6 +87,7 @@ struct SettingsView: View {
     @ObservedObject var viewModel = SettingsViewModel()
     @Environment(\.presentationMode) var presentationMode
     @State private var showShoppingView = false
+    @State private var showSavedListsSheet = false // Control sheet presentation
 
     var body: some View {
         NavigationStack {
@@ -122,26 +123,24 @@ struct SettingsView: View {
                         .padding(.horizontal)
                 }
 
-                // Saved Lists
-                VStack(alignment: .leading) {
-                    Text("Saved Grocery Lists")
-                        .font(.headline)
-                        .padding(.horizontal)
-
-                    List(viewModel.savedGroceryLists, id: \.id) { list in
-                        Button(action: {
-                            viewModel.loadGroceryList(list)
-                        }) {
-                            HStack {
-                                Text(list.storeName)
-                                Spacer()
-                                Text(viewModel.currencyFormatter.string(from: NSNumber(value: list.budget)) ?? "$0.00")
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
+                // View Saved Lists Button
+                Button(action: {
+                    showSavedListsSheet = true
+                    viewModel.fetchSavedGroceryLists() // Fetch lists when the sheet is about to show
+                }) {
+                    Text("View Saved Lists")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
                 }
-                
+                .padding(.horizontal)
+                .sheet(isPresented: $showSavedListsSheet) {
+                    SavedListsView(viewModel: viewModel)
+                }
+
                 // Grocery List
                 VStack(alignment: .leading) {
                     Text("Grocery List")
@@ -198,9 +197,6 @@ struct SettingsView: View {
                 }
             }
             .padding()
-            .onAppear {
-                viewModel.fetchSavedGroceryLists()
-            }
         }
     }
 
@@ -212,5 +208,36 @@ struct SettingsView: View {
     
     private func deleteItem(at offsets: IndexSet) {
         viewModel.groceryList.remove(atOffsets: offsets)
+    }
+}
+
+// New SavedListsView to display saved grocery lists in a sheet
+struct SavedListsView: View {
+    @ObservedObject var viewModel: SettingsViewModel
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationView {
+            List(viewModel.savedGroceryLists, id: \.id) { list in
+                Button(action: {
+                    viewModel.loadGroceryList(list)
+                    dismiss() // Dismiss the sheet after selecting a list
+                }) {
+                    HStack {
+                        Text(list.storeName)
+                        Spacer()
+                        Text(viewModel.currencyFormatter.string(from: NSNumber(value: list.budget)) ?? "$0.00")
+                    }
+                }
+            }
+            .navigationTitle("Saved Lists")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
