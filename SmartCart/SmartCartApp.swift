@@ -6,18 +6,24 @@
 //
 
 import SwiftUI
-import FirebaseCore // Import FirebaseCore to initialize Firebase
+import FirebaseCore
 
 @main
 struct SmartCartApp: App {
-    // Initialize Firebase in the app initializer
+    @StateObject var authViewModel = AuthViewModel()
+
     init() {
         FirebaseApp.configure()
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if authViewModel.isAuthenticated {
+                HomeView()
+            } else {
+                AuthView()
+                    .environmentObject(authViewModel)
+            }
         }
     }
 }
