@@ -91,112 +91,115 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Set Up Your Shopping Trip")
-                    .font(.title)
-                    .padding(.top)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Set Up Your Shopping Trip")
+                        .font(.title)
+                        .padding(.top)
 
-                // Store Picker
-                VStack(alignment: .leading) {
-                    Text("Select Store")
-                        .font(.headline)
-                        .padding(.horizontal)
+                    // Store Picker
+                    VStack(alignment: .leading) {
+                        Text("Select Store")
+                            .font(.headline)
+                            .padding(.horizontal)
 
-                    Picker("Select a Store", selection: $viewModel.storeName) {
-                        ForEach(viewModel.storeOptions, id: \.self) { store in
-                            Text(store)
+                        Picker("Select a Store", selection: $viewModel.storeName) {
+                            ForEach(viewModel.storeOptions, id: \.self) { store in
+                                Text(store)
+                            }
                         }
+                        .pickerStyle(MenuPickerStyle())
+                        .padding(.horizontal)
                     }
-                    .pickerStyle(MenuPickerStyle())
-                    .padding(.horizontal)
-                }
 
-                // Budget
-                VStack(alignment: .leading) {
-                    Text("Budget")
-                        .font(.headline)
-                        .padding(.horizontal)
+                    // Budget
+                    VStack(alignment: .leading) {
+                        Text("Budget")
+                            .font(.headline)
+                            .padding(.horizontal)
 
-                    TextField("Enter Budget", value: $viewModel.budget, formatter: viewModel.currencyFormatter)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                }
-
-                // View Saved Lists Button
-                Button(action: {
-                    showSavedListsSheet = true
-                    viewModel.fetchSavedGroceryLists() // Fetch lists when the sheet is about to show
-                }) {
-                    Text("View Saved Lists")
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal)
-                .sheet(isPresented: $showSavedListsSheet) {
-                    SavedListsView(viewModel: viewModel)
-                }
-
-                // Grocery List
-                VStack(alignment: .leading) {
-                    Text("Grocery List")
-                        .font(.headline)
-                        .padding(.horizontal)
-                    
-                    HStack {
-                        TextField("Add Item", text: $viewModel.newGroceryItem)
+                        TextField("Enter Budget", value: $viewModel.budget, formatter: viewModel.currencyFormatter)
+                            .keyboardType(.decimalPad)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                        Button(action: addItem) {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.blue)
-                        }
+                            .padding(.horizontal)
                     }
-                    .padding(.horizontal)
-                    
-                    List {
-                        ForEach(viewModel.groceryList, id: \.self) { item in
-                            Text(item)
-                        }
-                        .onDelete(perform: deleteItem)
-                    }
-                    
-                    Button(action: viewModel.clearGroceryList) {
-                        Text("Clear List")
+
+                    // View Saved Lists Button
+                    Button(action: {
+                        showSavedListsSheet = true
+                        viewModel.fetchSavedGroceryLists() // Fetch lists when the sheet is about to show
+                    }) {
+                        Text("View Saved Lists")
                             .font(.subheadline)
-                            .foregroundColor(.red)
+                            .foregroundColor(.blue)
                             .padding()
                             .frame(maxWidth: .infinity)
                             .background(Color(.systemGray6))
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
-                }
+                    .sheet(isPresented: $showSavedListsSheet) {
+                        SavedListsView(viewModel: viewModel)
+                    }
 
-                Spacer()
-
-                // Start Shopping Button
-                Button(action: {
-                    viewModel.saveGroceryList()
-                    showShoppingView = true
-                }) {
-                    Text("Start Shopping")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                    // Grocery List
+                    VStack(alignment: .leading) {
+                        Text("Grocery List")
+                            .font(.headline)
+                            .padding(.horizontal)
+                        
+                        HStack {
+                            TextField("Add Item", text: $viewModel.newGroceryItem)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            Button(action: addItem) {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.blue)
+                            }
+                        }
                         .padding(.horizontal)
+                        
+                        List {
+                            ForEach(viewModel.groceryList, id: \.self) { item in
+                                Text(item)
+                            }
+                            .onDelete(perform: deleteItem)
+                        }
+                        .frame(height: 200) // Restrict List height for better scrolling
+
+                        Button(action: viewModel.clearGroceryList) {
+                            Text("Clear List")
+                                .font(.subheadline)
+                                .foregroundColor(.red)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                    }
+
+                    Spacer()
+
+                    // Start Shopping Button
+                    Button(action: {
+                        viewModel.saveGroceryList()
+                        showShoppingView = true
+                    }) {
+                        Text("Start Shopping")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                    }
+                    .navigationDestination(isPresented: $showShoppingView) {
+                        ShoppingView()
+                    }
                 }
-                .navigationDestination(isPresented: $showShoppingView) {
-                    ShoppingView()
-                }
+                .padding()
             }
-            .padding()
         }
     }
 
