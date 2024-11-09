@@ -16,6 +16,17 @@ struct AuthView: View {
     var body: some View {
         NavigationView {
             VStack {
+                // Custom centered title
+                Text("SmartCart")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
+                    .padding(.top, 70)
+                
+                // Spacer to push the title to the top
+                Spacer()
+                
+                // Login/Signup picker
                 Picker("Login or Signup", selection: $isLoginMode) {
                     Text("Login").tag(true)
                     Text("Sign Up").tag(false)
@@ -23,6 +34,7 @@ struct AuthView: View {
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
 
+                // Email and Password fields
                 TextField("Email", text: $email)
                     .autocapitalization(.none)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -32,6 +44,7 @@ struct AuthView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
+                // Login/Sign Up button
                 Button(action: handleAction) {
                     Text(isLoginMode ? "Log In" : "Sign Up")
                         .font(.headline)
@@ -43,14 +56,16 @@ struct AuthView: View {
                 }
                 .padding()
 
+                // Error message display
                 if let errorMessage = authViewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
                 }
+                
+                Spacer() // Bottom Spacer to ensure even padding
             }
             .padding()
-            .navigationTitle(isLoginMode ? "Log In" : "Sign Up")
         }
     }
 
