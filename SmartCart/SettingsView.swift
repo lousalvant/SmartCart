@@ -46,6 +46,11 @@ class SettingsViewModel: ObservableObject {
             }
         }
     }
+    
+    // Method to clear the grocery list
+    func clearGroceryList() {
+        groceryList.removeAll()
+    }
 }
 
 struct SettingsView: View {
@@ -109,6 +114,18 @@ struct SettingsView: View {
                         }
                         .onDelete(perform: deleteItem)
                     }
+                    
+                    // Clear List Button
+                    Button(action: viewModel.clearGroceryList) {
+                        Text("Clear List")
+                            .font(.subheadline)
+                            .foregroundColor(.red)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
                 }
 
                 Spacer()
