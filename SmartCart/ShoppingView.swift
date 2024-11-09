@@ -1,5 +1,5 @@
 //
-//  HistoryView.swift
+//  ShoppingView.swift
 //  SmartCart
 //
 //  Created by Lou-Michael Salvant on 11/9/24.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct HistoryView: View {
+struct ShoppingView: View {
     var body: some View {
-        Text("Spending History Screen")
+        Text("Shopping Screen")
             .font(.largeTitle)
             .padding()
     }
