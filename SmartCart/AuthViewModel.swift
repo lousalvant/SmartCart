@@ -31,4 +31,13 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
+    
+    func signOut() {
+        do {
+            try Auth.auth().signOut()
+            isAuthenticated = false // Update authentication state
+        } catch {
+            errorMessage = "Error signing out: \(error.localizedDescription)"
+        }
+    }
 }

@@ -20,6 +20,7 @@ struct SmartCartApp: App {
         WindowGroup {
             if authViewModel.isAuthenticated {
                 HomeView()
+                    .environmentObject(authViewModel) // Pass environment object here
             } else {
                 AuthView()
                     .environmentObject(authViewModel)

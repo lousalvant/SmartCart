@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel // Access AuthViewModel
+
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -39,6 +41,20 @@ struct HomeView: View {
                         .padding(.horizontal)
                 }
                 
+                // Logout Button
+                Button(action: {
+                    authViewModel.signOut()
+                }) {
+                    Text("Log Out")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.red)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
+
                 Spacer()
             }
             .padding()
@@ -46,4 +62,3 @@ struct HomeView: View {
         }
     }
 }
-
