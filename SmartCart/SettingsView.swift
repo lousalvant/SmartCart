@@ -81,6 +81,14 @@ class SettingsViewModel: ObservableObject {
     func clearGroceryList() {
         groceryList.removeAll()
     }
+    
+    // Reset function
+        func reset() {
+            storeName = "Select a Store"
+            budget = nil
+            groceryList.removeAll()
+            newGroceryItem = ""
+        }
 }
 
 struct SettingsView: View {
@@ -199,6 +207,9 @@ struct SettingsView: View {
                     }
                 }
                 .padding()
+                .onAppear {
+                    viewModel.reset() // Reset settings when view appears
+                }
             }
         }
     }
