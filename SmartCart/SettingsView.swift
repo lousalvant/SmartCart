@@ -92,7 +92,7 @@ class SettingsViewModel: ObservableObject {
 }
 
 struct SettingsView: View {
-    @ObservedObject var viewModel = SettingsViewModel()
+    @EnvironmentObject var viewModel: SettingsViewModel // Use @EnvironmentObject instead of @ObservedObject
     @Environment(\.presentationMode) var presentationMode
     @State private var showShoppingView = false
     @State private var showSavedListsSheet = false // Control sheet presentation
@@ -204,11 +204,12 @@ struct SettingsView: View {
                     }
                     .navigationDestination(isPresented: $showShoppingView) {
                         ShoppingView()
+                            .environmentObject(viewModel) // Pass environment object to ShoppingView
                     }
                 }
                 .padding()
                 .onAppear {
-                    viewModel.reset() // Reset settings when view appears
+                    viewModel.clearGroceryList() // Clear settings on view appear
                 }
             }
         }
