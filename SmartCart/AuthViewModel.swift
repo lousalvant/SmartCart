@@ -12,6 +12,10 @@ class AuthViewModel: ObservableObject {
     @Published var isAuthenticated = false
     @Published var errorMessage: String?
     
+    init() {
+        self.isAuthenticated = Auth.auth().currentUser != nil // Check for an existing session for persisted login
+    }
+
     func login(email: String, password: String) {
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
             if let error = error {
