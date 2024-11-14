@@ -15,6 +15,7 @@ class SettingsViewModel: ObservableObject {
     @Published var groceryList = [String]()
     @Published var newGroceryItem = ""
     @Published var savedGroceryLists = [(id: String, storeName: String, budget: Double, groceryList: [String])]() // List of saved lists
+    @Published var checkedItems = Set<String>() // Store checked items persistently
     
     // Currency formatter
     let currencyFormatter: NumberFormatter = {
@@ -25,31 +26,39 @@ class SettingsViewModel: ObservableObject {
         return formatter
     }()
     
+    func toggleCheck(for item: String) {
+        if checkedItems.contains(item) {
+            checkedItems.remove(item)
+        } else {
+            checkedItems.insert(item)
+        }
+    }
+    
     // Store options
     let storeOptions = ["ALDI", "Costco", "Publix", "The Fresh Market", "Walmart", "WholeFoods", "Winn-Dixie", "Other"]
 
     // Fetch saved grocery lists from Firebase
     func fetchSavedGroceryLists() {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
-        
-        let db = Firestore.firestore()
-        let collection = db.collection("users").document(userID).collection("groceryLists")
-
-        collection.getDocuments { [weak self] snapshot, error in
-            if let error = error {
-                print("Error fetching grocery lists: \(error.localizedDescription)")
-                return
-            }
-
-            self?.savedGroceryLists = snapshot?.documents.compactMap { document in
-                let data = document.data()
-                let id = document.documentID
-                let storeName = data["storeName"] as? String ?? ""
-                let budget = data["budget"] as? Double ?? 0.0
-                let groceryList = data["groceryList"] as? [String] ?? []
-                return (id: id, storeName: storeName, budget: budget, groceryList: groceryList)
-            } ?? []
-        }
+//        guard let userID = Auth.auth().currentUser?.uid else { return }
+//        
+//        let db = Firestore.firestore()
+//        let collection = db.collection("users").document(userID).collection("groceryLists")
+//
+//        collection.getDocuments { [weak self] snapshot, error in
+//            if let error = error {
+//                print("Error fetching grocery lists: \(error.localizedDescription)")
+//                return
+//            }
+//
+//            self?.savedGroceryLists = snapshot?.documents.compactMap { document in
+//                let data = document.data()
+//                let id = document.documentID
+//                let storeName = data["storeName"] as? String ?? ""
+//                let budget = data["budget"] as? Double ?? 0.0
+//                let groceryList = data["groceryList"] as? [String] ?? []
+//                return (id: id, storeName: storeName, budget: budget, groceryList: groceryList)
+//            } ?? []
+//        }
     }
     
     func loadGroceryList(_ list: (id: String, storeName: String, budget: Double, groceryList: [String])) {
@@ -59,23 +68,23 @@ class SettingsViewModel: ObservableObject {
     }
 
     func saveGroceryList() {
-        guard let userID = Auth.auth().currentUser?.uid else { return }
-        
-        let db = Firestore.firestore()
-        let document = db.collection("users").document(userID).collection("groceryLists").document()
-
-        document.setData([
-            "storeName": storeName,
-            "budget": budget ?? 0.0,
-            "groceryList": groceryList,
-            "createdAt": Timestamp()
-        ]) { error in
-            if let error = error {
-                print("Error saving grocery list: \(error.localizedDescription)")
-            } else {
-                print("Grocery list saved successfully.")
-            }
-        }
+//        guard let userID = Auth.auth().currentUser?.uid else { return }
+//        
+//        let db = Firestore.firestore()
+//        let document = db.collection("users").document(userID).collection("groceryLists").document()
+//
+//        document.setData([
+//            "storeName": storeName,
+//            "budget": budget ?? 0.0,
+//            "groceryList": groceryList,
+//            "createdAt": Timestamp()
+//        ]) { error in
+//            if let error = error {
+//                print("Error saving grocery list: \(error.localizedDescription)")
+//            } else {
+//                print("Grocery list saved successfully.")
+//            }
+//        }
     }
     
     func clearGroceryList() {

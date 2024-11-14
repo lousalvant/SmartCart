@@ -9,15 +9,15 @@ import SwiftUI
 import CoreLocation
 
 struct ShoppingView: View {
-    @EnvironmentObject var viewModel: SettingsViewModel // Access the SettingsViewModel
+    @EnvironmentObject var viewModel: SettingsViewModel
     @State private var showListSheet = false
-    @State private var location: String = "Detecting..." // Display detected location
-    @State private var itemList: [(name: String, price: Double)] = [] // List of items and their prices
+    @State private var location: String = "Detecting..."
+    @State private var itemList: [(name: String, price: Double)] = []
     @State private var showCartSummary = false
 
     var body: some View {
         VStack(spacing: 20) {
-            // Top Section: Store, Location, and Budget
+            // Top Section
             VStack {
                 Text("Shopping at \(viewModel.storeName)")
                     .font(.headline)
@@ -42,7 +42,7 @@ struct ShoppingView: View {
                         .background(Color.blue)
                         .cornerRadius(10)
                 }
-                
+
                 Button(action: {
                     // Implement scanning functionality
                 }) {
@@ -82,7 +82,7 @@ struct ShoppingView: View {
                         Text(viewModel.currencyFormatter.string(from: NSNumber(value: item.price)) ?? "$0.00")
                     }
                 }
-                .frame(height: 250) // Adjust list height as needed
+                .frame(height: 250)
             }
 
             Spacer()
@@ -105,24 +105,22 @@ struct ShoppingView: View {
             }
         }
         .padding()
-        .onAppear(perform: detectLocation) // Call location detection on view load
+        .onAppear(perform: detectLocation)
         .sheet(isPresented: $showListSheet) {
-            ViewListSheetView(itemList: $viewModel.groceryList)
+            ViewListSheetView()
+                .environmentObject(viewModel) // Pass environment object to ViewListSheetView
         }
     }
 
-    // Location Detection (Mock implementation here; replace with actual location service)
     private func detectLocation() {
-        // Mock location setting; replace with actual location detection
-        location = "Florida" // For example purposes; use CLLocationManager for actual detection
+        location = "Florida" // Placeholder for actual location detection
     }
 }
 
 // Subview for Viewing and Checking Off the List
 struct ViewListSheetView: View {
-    @Binding var itemList: [String]
+    @EnvironmentObject var viewModel: SettingsViewModel // Directly access the view model
     @Environment(\.dismiss) var dismiss
-    @State private var checkedItems: Set<String> = [] // Track checked items here
 
     var body: some View {
         VStack {
@@ -130,15 +128,15 @@ struct ViewListSheetView: View {
                 .font(.headline)
                 .padding()
 
-            List(itemList, id: \.self) { item in
+            List(viewModel.groceryList, id: \.self) { item in
                 HStack {
                     Text(item)
                     Spacer()
                     Button(action: {
-                        toggleCheck(for: item)
+                        viewModel.toggleCheck(for: item) // Directly use toggleCheck on the view model
                     }) {
-                        Image(systemName: checkedItems.contains(item) ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(checkedItems.contains(item) ? .green : .gray)
+                        Image(systemName: viewModel.checkedItems.contains(item) ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(viewModel.checkedItems.contains(item) ? .green : .gray)
                     }
                 }
             }
@@ -148,15 +146,6 @@ struct ViewListSheetView: View {
                 dismiss()
             }
             .padding()
-        }
-    }
-
-    // Toggle the check state of an item
-    private func toggleCheck(for item: String) {
-        if checkedItems.contains(item) {
-            checkedItems.remove(item)
-        } else {
-            checkedItems.insert(item)
         }
     }
 }
