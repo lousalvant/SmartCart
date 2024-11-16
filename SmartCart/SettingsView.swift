@@ -15,7 +15,6 @@ class SettingsViewModel: ObservableObject {
     @Published var groceryList = [String]()
     @Published var newGroceryItem = ""
     @Published var savedGroceryLists = [(id: String, storeName: String, budget: Double, groceryList: [String])]() // List of saved lists
-    @Published var checkedItems = Set<String>() // Store checked items persistently
     
     // Currency formatter
     let currencyFormatter: NumberFormatter = {
@@ -26,39 +25,31 @@ class SettingsViewModel: ObservableObject {
         return formatter
     }()
     
-    func toggleCheck(for item: String) {
-        if checkedItems.contains(item) {
-            checkedItems.remove(item)
-        } else {
-            checkedItems.insert(item)
-        }
-    }
-    
     // Store options
     let storeOptions = ["ALDI", "Costco", "Publix", "The Fresh Market", "Walmart", "WholeFoods", "Winn-Dixie", "Other"]
 
     // Fetch saved grocery lists from Firebase
     func fetchSavedGroceryLists() {
-//        guard let userID = Auth.auth().currentUser?.uid else { return }
-//        
-//        let db = Firestore.firestore()
-//        let collection = db.collection("users").document(userID).collection("groceryLists")
-//
-//        collection.getDocuments { [weak self] snapshot, error in
-//            if let error = error {
-//                print("Error fetching grocery lists: \(error.localizedDescription)")
-//                return
-//            }
-//
-//            self?.savedGroceryLists = snapshot?.documents.compactMap { document in
-//                let data = document.data()
-//                let id = document.documentID
-//                let storeName = data["storeName"] as? String ?? ""
-//                let budget = data["budget"] as? Double ?? 0.0
-//                let groceryList = data["groceryList"] as? [String] ?? []
-//                return (id: id, storeName: storeName, budget: budget, groceryList: groceryList)
-//            } ?? []
-//        }
+        guard let userID = Auth.auth().currentUser?.uid else { return }
+        
+        let db = Firestore.firestore()
+        let collection = db.collection("users").document(userID).collection("groceryLists")
+
+        collection.getDocuments { [weak self] snapshot, error in
+            if let error = error {
+                print("Error fetching grocery lists: \(error.localizedDescription)")
+                return
+            }
+
+            self?.savedGroceryLists = snapshot?.documents.compactMap { document in
+                let data = document.data()
+                let id = document.documentID
+                let storeName = data["storeName"] as? String ?? ""
+                let budget = data["budget"] as? Double ?? 0.0
+                let groceryList = data["groceryList"] as? [String] ?? []
+                return (id: id, storeName: storeName, budget: budget, groceryList: groceryList)
+            } ?? []
+        }
     }
     
     func loadGroceryList(_ list: (id: String, storeName: String, budget: Double, groceryList: [String])) {
@@ -68,23 +59,23 @@ class SettingsViewModel: ObservableObject {
     }
 
     func saveGroceryList() {
-//        guard let userID = Auth.auth().currentUser?.uid else { return }
-//        
-//        let db = Firestore.firestore()
-//        let document = db.collection("users").document(userID).collection("groceryLists").document()
-//
-//        document.setData([
-//            "storeName": storeName,
-//            "budget": budget ?? 0.0,
-//            "groceryList": groceryList,
-//            "createdAt": Timestamp()
-//        ]) { error in
-//            if let error = error {
-//                print("Error saving grocery list: \(error.localizedDescription)")
-//            } else {
-//                print("Grocery list saved successfully.")
-//            }
-//        }
+        guard let userID = Auth.auth().currentUser?.uid else { return }
+        
+        let db = Firestore.firestore()
+        let document = db.collection("users").document(userID).collection("groceryLists").document()
+
+        document.setData([
+            "storeName": storeName,
+            "budget": budget ?? 0.0,
+            "groceryList": groceryList,
+            "createdAt": Timestamp()
+        ]) { error in
+            if let error = error {
+                print("Error saving grocery list: \(error.localizedDescription)")
+            } else {
+                print("Grocery list saved successfully.")
+            }
+        }
     }
     
     func clearGroceryList() {
@@ -101,7 +92,7 @@ class SettingsViewModel: ObservableObject {
 }
 
 struct SettingsView: View {
-    @EnvironmentObject var viewModel: SettingsViewModel // Use @EnvironmentObject instead of @ObservedObject
+    @ObservedObject var viewModel = SettingsViewModel()
     @Environment(\.presentationMode) var presentationMode
     @State private var showShoppingView = false
     @State private var showSavedListsSheet = false // Control sheet presentation
@@ -135,10 +126,28 @@ struct SettingsView: View {
                             .font(.headline)
                             .padding(.horizontal)
 
-                        TextField("Enter Budget", value: $viewModel.budget, formatter: viewModel.currencyFormatter)
+                        HStack {
+                            Text("$") // Prefix text
+                                .font(.headline)
+                            TextField(
+                                "Enter Budget",
+                                text: Binding(
+                                    get: {
+                                        viewModel.budget != nil ? String(format: "%.2f", viewModel.budget!) : ""
+                                    },
+                                    set: { newValue in
+                                        if let value = Double(newValue.filter { "0123456789.".contains($0) }) {
+                                            viewModel.budget = value
+                                        } else {
+                                            viewModel.budget = nil
+                                        }
+                                    }
+                                )
+                            )
                             .keyboardType(.decimalPad)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
+                        }
+                        .padding(.horizontal)
                     }
 
                     // View Saved Lists Button
@@ -213,12 +222,11 @@ struct SettingsView: View {
                     }
                     .navigationDestination(isPresented: $showShoppingView) {
                         ShoppingView()
-                            .environmentObject(viewModel) // Pass environment object to ShoppingView
                     }
                 }
                 .padding()
                 .onAppear {
-                    viewModel.clearGroceryList() // Clear settings on view appear
+                    viewModel.reset() // Reset settings when view appears
                 }
             }
         }
