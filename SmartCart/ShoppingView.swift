@@ -9,9 +9,14 @@ import SwiftUI
 
 struct ShoppingView: View {
     @EnvironmentObject var settingsViewModel: SettingsViewModel // Access SettingsViewModel
-    @State private var cartItems: [String] = [] // Track items in the cart
-    @State private var newItem = "" // Input for new item
+    @State private var cartItems: [(name: String, price: Double)] = [] // Track items in the cart with price
+    @State private var showItemEntrySheet = false // Show sheet for item entry
     @State private var showCartSummary = false // Control navigation to CartSummaryView
+
+    // Compute the total price of items in the cart
+    private var totalPrice: Double {
+        cartItems.reduce(0) { $0 + $1.price }
+    }
 
     var body: some View {
         NavigationStack {
@@ -41,22 +46,38 @@ struct ShoppingView: View {
 
                     // Display items in the cart
                     List {
-                        ForEach(cartItems, id: \.self) { item in
-                            Text(item)
+                        ForEach(cartItems, id: \.name) { item in
+                            HStack {
+                                Text(item.name)
+                                Spacer()
+                                Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: item.price)) ?? "$0.00")
+                            }
                         }
                         .onDelete(perform: deleteItem)
                     }
                     .frame(height: 200) // Limit height of the cart list
                     
-                    // Add new item to cart
+                    // Total price below the cart
                     HStack {
-                        TextField("Add Item", text: $newItem)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                        Button(action: addItem) {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.blue)
-                                .font(.title2)
-                        }
+                        Text("Total:")
+                            .font(.headline)
+                        Spacer()
+                        Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalPrice)) ?? "$0.00")
+                            .font(.headline)
+                    }
+                    .padding(.horizontal)
+
+                    // Add item button
+                    Button(action: {
+                        showItemEntrySheet = true
+                    }) {
+                        Text("Enter Item")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(10)
                     }
                 }
                 .padding()
@@ -82,18 +103,68 @@ struct ShoppingView: View {
             }
             .navigationTitle("Shopping Session")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showItemEntrySheet) {
+                ItemEntryView { itemName, itemPrice in
+                    addItem(name: itemName, price: itemPrice)
+                }
+            }
         }
     }
 
     // Add new item to the cart
-    private func addItem() {
-        guard !newItem.isEmpty else { return }
-        cartItems.append(newItem)
-        newItem = ""
+    private func addItem(name: String, price: Double) {
+        cartItems.append((name: name, price: price))
     }
 
     // Delete item from the cart
     private func deleteItem(at offsets: IndexSet) {
         cartItems.remove(atOffsets: offsets)
+    }
+}
+
+// A new view for item entry
+struct ItemEntryView: View {
+    @Environment(\.dismiss) var dismiss // Control sheet dismissal
+    @State private var itemName = ""
+    @State private var itemPriceText = ""
+    var onSave: (String, Double) -> Void
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Enter Item Details")
+                    .font(.title2)
+                    .bold()
+
+                TextField("Item Name", text: $itemName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                TextField("Item Price", text: $itemPriceText)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                Button(action: saveItem) {
+                    Text("Enter")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
+                .padding()
+            }
+            .padding()
+            .navigationTitle("Add Item")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func saveItem() {
+        guard !itemName.isEmpty, let itemPrice = Double(itemPriceText) else { return }
+        onSave(itemName, itemPrice)
+        dismiss()
     }
 }
