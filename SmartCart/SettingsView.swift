@@ -92,7 +92,7 @@ class SettingsViewModel: ObservableObject {
 }
 
 struct SettingsView: View {
-    @ObservedObject var viewModel = SettingsViewModel()
+    @EnvironmentObject var viewModel: SettingsViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var showShoppingView = false
     @State private var showSavedListsSheet = false // Control sheet presentation
