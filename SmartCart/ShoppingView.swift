@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct ShoppingView: View {
     @EnvironmentObject var settingsViewModel: SettingsViewModel // Access SettingsViewModel
@@ -13,20 +14,35 @@ struct ShoppingView: View {
     @State private var showItemEntrySheet = false // Show sheet for manual item entry
     @State private var showCartSummary = false // Control navigation to CartSummaryView
     @State private var showScanner = false // Show scanner sheet
+    
+    // Location and Tax Information
+    @State private var cityState = "Unknown Location"
+    @State private var taxRate: Double = 0.0
+    @StateObject private var locationManagerDelegate = LocationManagerDelegate()
 
-    // Compute the total price of items in the cart
-    private var totalPrice: Double {
+    // Subtotal, Sales Tax, and Estimated Total
+    private var subtotal: Double {
         cartItems.reduce(0) { $0 + $1.price }
+    }
+    private var salesTax: Double {
+        subtotal * taxRate
+    }
+    private var estimatedTotal: Double {
+        subtotal + salesTax
     }
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
-                // Display store, budget, and location at the top
+                // Location, Tax Rate, and Store at the top
                 VStack(alignment: .leading, spacing: 10) {
+                    Text("Location: \(cityState)")
+                        .font(.headline)
+                    Text("Sales Tax: \(String(format: "%.2f", taxRate))%")
+                        .font(.headline)
                     Text("Store: \(settingsViewModel.storeName)")
                         .font(.headline)
-                    
+                                    
                     if let budget = settingsViewModel.budget {
                         Text("Budget: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")")
                             .font(.headline)
@@ -58,13 +74,25 @@ struct ShoppingView: View {
                     }
                     .frame(height: 200) // Limit height of the cart list
 
-                    // Total price below the cart
-                    HStack {
-                        Text("Total:")
-                            .font(.headline)
-                        Spacer()
-                        Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalPrice)) ?? "$0.00")
-                            .font(.headline)
+                    // Subtotal, Sales Tax, and Estimated Total
+                    VStack(alignment: .leading, spacing: 5) {
+                        HStack {
+                            Text("Subtotal:")
+                            Spacer()
+                            Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: subtotal)) ?? "$0.00")
+                        }
+                        HStack {
+                            Text("Sales Tax:")
+                            Spacer()
+                            Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: salesTax)) ?? "$0.00")
+                        }
+                        HStack {
+                            Text("Est. Total:")
+                                .bold()
+                            Spacer()
+                            Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: estimatedTotal)) ?? "$0.00")
+                                .bold()
+                        }
                     }
                     .padding(.horizontal)
 
@@ -132,6 +160,9 @@ struct ShoppingView: View {
             }
             .navigationTitle("Shopping Session")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                configureLocationManager()
+            }
         }
     }
 
@@ -150,29 +181,118 @@ struct ShoppingView: View {
         print("Scanned Data: \(scannedData)") // Debugging
 
         for (index, line) in scannedData.enumerated() {
-            // Look for a price pattern (with or without a $)
             if let priceMatch = line.range(of: "\\$?\\d+(\\.\\d{2})?", options: .regularExpression) {
                 let priceString = String(line[priceMatch]).replacingOccurrences(of: "$", with: "")
-                let itemName: String
+                let itemName = (index + 1 < scannedData.count) ? scannedData[index + 1].trimmingCharacters(in: .whitespacesAndNewlines) : "Unknown Item"
                 
-                // Check if the next line contains the item name
-                if index + 1 < scannedData.count {
-                    itemName = scannedData[index + 1].trimmingCharacters(in: .whitespacesAndNewlines)
-                } else {
-                    itemName = "Unknown Item"
-                }
-                
-                // Convert price to Double and add to cart
                 if let price = Double(priceString) {
-                    addItem(name: itemName.isEmpty ? "Unknown Item" : itemName, price: price)
+                    addItem(name: itemName, price: price)
                     return
                 }
             }
         }
+    }
 
-        print("No valid item or price found in scanned data.")
+    // Configure CLLocationManager
+        private func configureLocationManager() {
+            locationManagerDelegate.onLocationUpdate = { location in
+                print("Received location: \(location.coordinate.latitude), \(location.coordinate.longitude)") // Debugging
+                self.getZipCode(from: location) { zipCode in
+                    guard let zipCode = zipCode else {
+                        print("Failed to retrieve ZIP code.")
+                        return
+                    }
+                    print("ZIP Code: \(zipCode)") // Debugging
+                    self.fetchTaxRate(by: zipCode)
+                }
+            }
+            locationManagerDelegate.startUpdatingLocation()
+        }
+
+        private func getZipCode(from location: CLLocation, completion: @escaping (String?) -> Void) {
+            let geocoder = CLGeocoder()
+            geocoder.reverseGeocodeLocation(location) { placemarks, error in
+                if let error = error {
+                    print("Failed to get ZIP code: \(error.localizedDescription)")
+                    completion(nil)
+                } else if let placemark = placemarks?.first, let postalCode = placemark.postalCode {
+                    print("Retrieved ZIP code: \(postalCode)") // Debugging
+                    completion(postalCode)
+                } else {
+                    print("No postal code found.")
+                    completion(nil)
+                }
+            }
+        }
+
+    private func fetchTaxRate(by zipCode: String) {
+        let urlString = "https://retrieveustaxrate.p.rapidapi.com/GetTaxRateByZip?zip=\(zipCode)"
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL.")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("38672978a3mshb0e70ee4a14db29p110155jsnb9b1f54aa483", forHTTPHeaderField: "x-rapidapi-key")
+        request.setValue("retrieveustaxrate.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
+        request.setValue("Basic Ym9sZGNoYXQ6TGZYfm0zY2d1QzkuKz9SLw==", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error fetching tax rate: \(error)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received.")
+                return
+            }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let city = json["City"] as? String,
+                   let state = json["State"] as? String,
+                   let taxRate = json["TaxRate"] as? Double {
+                    DispatchQueue.main.async {
+                        self.cityState = "\(city), \(state)"
+                        self.taxRate = taxRate
+                    }
+                } else {
+                    print("Unexpected JSON format or missing data.")
+                }
+            } catch {
+                print("Failed to decode tax rate: \(error)")
+            }
+        }.resume()
     }
 }
+
+    class LocationManagerDelegate: NSObject, ObservableObject, CLLocationManagerDelegate {
+        var onLocationUpdate: ((CLLocation) -> Void)?
+        private var locationManager = CLLocationManager()
+
+        override init() {
+            super.init()
+            locationManager.delegate = self
+        }
+
+        func startUpdatingLocation() {
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.startUpdatingLocation()
+        }
+
+        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            if let location = locations.last {
+                onLocationUpdate?(location)
+                locationManager.stopUpdatingLocation()
+            }
+        }
+
+        func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+            print("Location manager error: \(error.localizedDescription)")
+        }
+    }
 
 // A new view for item entry
 struct ItemEntryView: View {
@@ -218,5 +338,13 @@ struct ItemEntryView: View {
         guard !itemName.isEmpty, let itemPrice = Double(itemPriceText) else { return }
         onSave(itemName, itemPrice)
         dismiss()
+    }
+}
+
+extension Double {
+    /// Rounds the double to the specified number of decimal places.
+    func rounded(toPlaces places: Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return (self * divisor).rounded() / divisor
     }
 }
