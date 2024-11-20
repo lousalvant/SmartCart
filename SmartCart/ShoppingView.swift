@@ -10,8 +10,9 @@ import SwiftUI
 struct ShoppingView: View {
     @EnvironmentObject var settingsViewModel: SettingsViewModel // Access SettingsViewModel
     @State private var cartItems: [(name: String, price: Double)] = [] // Track items in the cart with price
-    @State private var showItemEntrySheet = false // Show sheet for item entry
+    @State private var showItemEntrySheet = false // Show sheet for manual item entry
     @State private var showCartSummary = false // Control navigation to CartSummaryView
+    @State private var showScanner = false // Show scanner sheet
 
     // Compute the total price of items in the cart
     private var totalPrice: Double {
@@ -56,7 +57,7 @@ struct ShoppingView: View {
                         .onDelete(perform: deleteItem)
                     }
                     .frame(height: 200) // Limit height of the cart list
-                    
+
                     // Total price below the cart
                     HStack {
                         Text("Total:")
@@ -79,8 +80,36 @@ struct ShoppingView: View {
                             .background(Color.blue)
                             .cornerRadius(10)
                     }
+
+                    // Scan item button
+                    Button(action: {
+                        showScanner = true
+                    }) {
+                        Text("Scan Item")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.orange)
+                            .cornerRadius(10)
+                    }
                 }
                 .padding()
+                .sheet(isPresented: $showItemEntrySheet) {
+                    ItemEntryView { itemName, itemPrice in
+                        addItem(name: itemName, price: itemPrice)
+                    }
+                }
+                .sheet(isPresented: $showScanner) {
+                    ScannerView { result in
+                        switch result {
+                        case .success(let scannedData):
+                            parseScannedData(scannedData)
+                        case .failure(let error):
+                            print("Scanning failed: \(error.localizedDescription)")
+                        }
+                    }
+                }
 
                 Spacer()
 
@@ -103,11 +132,6 @@ struct ShoppingView: View {
             }
             .navigationTitle("Shopping Session")
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showItemEntrySheet) {
-                ItemEntryView { itemName, itemPrice in
-                    addItem(name: itemName, price: itemPrice)
-                }
-            }
         }
     }
 
@@ -119,6 +143,34 @@ struct ShoppingView: View {
     // Delete item from the cart
     private func deleteItem(at offsets: IndexSet) {
         cartItems.remove(atOffsets: offsets)
+    }
+
+    // Parse scanned data
+    private func parseScannedData(_ scannedData: [String]) {
+        print("Scanned Data: \(scannedData)") // Debugging
+
+        for (index, line) in scannedData.enumerated() {
+            // Look for a price pattern (with or without a $)
+            if let priceMatch = line.range(of: "\\$?\\d+(\\.\\d{2})?", options: .regularExpression) {
+                let priceString = String(line[priceMatch]).replacingOccurrences(of: "$", with: "")
+                let itemName: String
+                
+                // Check if the next line contains the item name
+                if index + 1 < scannedData.count {
+                    itemName = scannedData[index + 1].trimmingCharacters(in: .whitespacesAndNewlines)
+                } else {
+                    itemName = "Unknown Item"
+                }
+                
+                // Convert price to Double and add to cart
+                if let price = Double(priceString) {
+                    addItem(name: itemName.isEmpty ? "Unknown Item" : itemName, price: price)
+                    return
+                }
+            }
+        }
+
+        print("No valid item or price found in scanned data.")
     }
 }
 
