@@ -19,6 +19,8 @@ struct ShoppingView: View {
     @State private var cityState = "Unknown Location"
     @State private var taxRate: Double = 0.0
     @StateObject private var locationManagerDelegate = LocationManagerDelegate()
+    
+    @State private var showGroceryListSheet = false
 
     // Subtotal, Sales Tax, and Estimated Total
     private var subtotal: Double {
@@ -60,7 +62,7 @@ struct ShoppingView: View {
                     Text("Your Cart")
                         .font(.title2)
                         .bold()
-
+                    
                     // Display items in the cart
                     List {
                         ForEach(cartItems, id: \.name) { item in
@@ -73,7 +75,7 @@ struct ShoppingView: View {
                         .onDelete(perform: deleteItem)
                     }
                     .frame(height: 200) // Limit height of the cart list
-
+                    
                     // Subtotal, Sales Tax, and Estimated Total
                     VStack(alignment: .leading, spacing: 5) {
                         HStack {
@@ -95,47 +97,66 @@ struct ShoppingView: View {
                         }
                     }
                     .padding(.horizontal)
-
-                    // Add item button
-                    Button(action: {
-                        showItemEntrySheet = true
-                    }) {
-                        Text("Enter Item")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                    }
-
-                    // Scan item button
-                    Button(action: {
-                        showScanner = true
-                    }) {
-                        Text("Scan Item")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.orange)
-                            .cornerRadius(10)
-                    }
-                }
-                .padding()
-                .sheet(isPresented: $showItemEntrySheet) {
-                    ItemEntryView { itemName, itemPrice in
-                        addItem(name: itemName, price: itemPrice)
-                    }
-                }
-                .sheet(isPresented: $showScanner) {
-                    ScannerView { result in
-                        switch result {
-                        case .success(let scannedData):
-                            parseScannedData(scannedData)
-                        case .failure(let error):
-                            print("Scanning failed: \(error.localizedDescription)")
+                    
+                    HStack(spacing: 10) {
+                        // Add item button
+                        Button(action: {
+                            showItemEntrySheet = true
+                        }) {
+                            Text("Enter Item")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.blue)
+                                .cornerRadius(10)
                         }
+                        
+                        // Scan item button
+                        Button(action: {
+                            showScanner = true
+                        }) {
+                            Text("Scan Item")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.orange)
+                                .cornerRadius(10)
+                        }
+                        
+                        // View list button
+                        Button(action: {
+                            showGroceryListSheet = true
+                        }) {
+                            Text("View List")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.purple)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .sheet(isPresented: $showItemEntrySheet) {
+                        ItemEntryView { itemName, itemPrice in
+                            addItem(name: itemName, price: itemPrice)
+                        }
+                    }
+                    .sheet(isPresented: $showScanner) {
+                        ScannerView { result in
+                            switch result {
+                            case .success(let scannedData):
+                                parseScannedData(scannedData)
+                            case .failure(let error):
+                                print("Scanning failed: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                    .sheet(isPresented: $showGroceryListSheet) {
+                        ViewGroceryListSheet(groceryList: settingsViewModel.groceryList)
                     }
                 }
 
@@ -338,6 +359,28 @@ struct ItemEntryView: View {
         guard !itemName.isEmpty, let itemPrice = Double(itemPriceText) else { return }
         onSave(itemName, itemPrice)
         dismiss()
+    }
+}
+
+struct ViewGroceryListSheet: View {
+    @Environment(\.dismiss) var dismiss
+    let groceryList: [String] // Local copy of the grocery list
+
+    var body: some View {
+        NavigationView {
+            List(groceryList, id: \.self) { item in
+                Text(item) // Display each item
+            }
+            .navigationTitle("Your Grocery List")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        // Dismiss handled by the sheet's environment
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 
