@@ -21,6 +21,10 @@ struct ShoppingView: View {
     @StateObject private var locationManagerDelegate = LocationManagerDelegate()
     
     @State private var showGroceryListSheet = false
+    
+    // Alert State
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
     // Subtotal, Sales Tax, and Estimated Total
     private var subtotal: Double {
@@ -184,12 +188,34 @@ struct ShoppingView: View {
             .onAppear {
                 configureLocationManager()
             }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Budget Exceeded!"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
 
     // Add new item to the cart
     private func addItem(name: String, price: Double) {
         cartItems.append((name: name, price: price))
+        
+        if let budget = settingsViewModel.budget {
+            print("Budget: \(budget)") // Debugging
+            print("Estimated Total: \(estimatedTotal)") // Debugging
+            
+            if estimatedTotal > budget {
+                alertMessage = "Your total has exceeded your budget of \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")."
+                print("Budget Exceeded!") // Debugging
+                DispatchQueue.main.async {
+                    showAlert = true
+                }
+            }
+        } else {
+            print("Budget not set. Skipping budget check.") // Debugging
+        }
     }
 
     // Delete item from the cart

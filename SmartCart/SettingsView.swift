@@ -11,7 +11,7 @@ import FirebaseAuth
 
 class SettingsViewModel: ObservableObject {
     @Published var storeName = "Select a Store"
-    @Published var budget: Double? = nil
+    @Published var budget: Double? = 100.0
     @Published var groceryList = [String]()
     @Published var newGroceryItem = ""
     @Published var savedGroceryLists = [(id: String, storeName: String, budget: Double, groceryList: [String])]() // List of saved lists
@@ -96,6 +96,8 @@ struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var showShoppingView = false
     @State private var showSavedListsSheet = false // Control sheet presentation
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
     var body: some View {
         NavigationStack {
@@ -208,8 +210,13 @@ struct SettingsView: View {
 
                     // Start Shopping Button
                     Button(action: {
-                        viewModel.saveGroceryList()
-                        showShoppingView = true
+                        if let budget = viewModel.budget, budget > 0 {
+                            viewModel.saveGroceryList()
+                            showShoppingView = true
+                        } else {
+                            alertMessage = "Please set a budget before starting your shopping session."
+                            showAlert = true
+                        }
                     }) {
                         Text("Start Shopping")
                             .font(.headline)
@@ -222,6 +229,13 @@ struct SettingsView: View {
                     }
                     .navigationDestination(isPresented: $showShoppingView) {
                         ShoppingView()
+                    }
+                    .alert(isPresented: $showAlert) {
+                        Alert(
+                            title: Text("Missing Budget"),
+                            message: Text(alertMessage),
+                            dismissButton: .default(Text("OK"))
+                        )
                     }
                 }
                 .padding()
