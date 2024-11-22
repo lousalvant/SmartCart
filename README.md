@@ -28,7 +28,11 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 
 **Required Must-have Stories**
 
-- [ ] User can log in or register for an account.
+- [x] User can log in or register for an account.
+
+![GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWJ3a3o1ZWtscjl6Z2RnYjk1dDhhdzc3ZHQ0MWZyc25ocXV3bHl3diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UHuGK08lTae5Qnh7sV/giphy.gif)
+
+
 - [ ] User can scan a price tag to capture the item’s price.
 - [ ] User can manually enter the price of an item if scanning is unavailable.
 - [ ] User can view a real-time total of all items in the cart, including tax based on location.

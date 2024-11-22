@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		E45C67062CDFB67A0080041E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E45C67052CDFB67A0080041E /* FirebaseAuth */; };
 		E45C67082CDFB6810080041E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = E45C67072CDFB6810080041E /* FirebaseFirestore */; };
+		E45C67212CF0E4940080041E /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = E45C67202CF0E4940080041E /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		E45C66C82CDF8E2D0080041E /* SmartCart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartCart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E45C67202CF0E4940080041E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -42,6 +44,7 @@
 				E45C66CA2CDF8E2D0080041E /* SmartCart */,
 				E45C66DC2CDF8FAE0080041E /* Frameworks */,
 				E45C66C92CDF8E2D0080041E /* Products */,
+				E45C67202CF0E4940080041E /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -129,6 +132,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E45C67212CF0E4940080041E /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
