@@ -10,7 +10,7 @@ import CoreLocation
 
 struct ShoppingView: View {
     @EnvironmentObject var settingsViewModel: SettingsViewModel // Access SettingsViewModel
-    @State private var cartItems: [(name: String, price: Double)] = [] // Track items in the cart with price
+    @State private var cartItems: [(name: String, price: Double, quantity: Int)] = [] // Track items in the cart with price
     @State private var showItemEntrySheet = false // Show sheet for manual item entry
     @State private var showCartSummary = false // Control navigation to CartSummaryView
     @State private var showScanner = false // Show scanner sheet
@@ -28,7 +28,7 @@ struct ShoppingView: View {
 
     // Subtotal, Sales Tax, and Estimated Total
     private var subtotal: Double {
-        cartItems.reduce(0) { $0 + $1.price }
+        cartItems.reduce(0) { $0 + ($1.price * Double($1.quantity)) }
     }
     private var salesTax: Double {
         subtotal * taxRate
@@ -69,11 +69,18 @@ struct ShoppingView: View {
                     
                     // Display items in the cart
                     List {
-                        ForEach(cartItems, id: \.name) { item in
+                        ForEach(cartItems.indices, id: \.self) { index in
                             HStack {
-                                Text(item.name)
+                                Text(cartItems[index].name)
                                 Spacer()
-                                Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: item.price)) ?? "$0.00")
+                                Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: cartItems[index].price)) ?? "$0.00")
+                                Spacer()
+                                Stepper(value: $cartItems[index].quantity, in: 1...99) {
+                                    Text("Qty: \(cartItems[index].quantity)")
+                                }
+                                .onChange(of: cartItems[index].quantity) { _ in
+                                    checkBudget() // Recalculate totals and check budget on quantity change
+                                }
                             }
                         }
                         .onDelete(perform: deleteItem)
@@ -182,7 +189,7 @@ struct ShoppingView: View {
                 .navigationDestination(isPresented: $showCartSummary) {
                     CartSummaryView(
                         store: settingsViewModel.storeName,
-                        cartItems: cartItems,
+                        cartItems: cartItems.map { ($0.name, $0.price, $0.quantity) },
                         subtotal: subtotal,
                         salesTax: salesTax,
                         estimatedTotal: estimatedTotal
@@ -206,7 +213,8 @@ struct ShoppingView: View {
 
     // Add new item to the cart
     private func addItem(name: String, price: Double) {
-        cartItems.append((name: name, price: price))
+        cartItems.append((name: name, price: price, quantity: 1))
+        checkBudget()
         
         if let budget = settingsViewModel.budget {
             print("Budget: \(budget)") // Debugging
@@ -221,6 +229,13 @@ struct ShoppingView: View {
             }
         } else {
             print("Budget not set. Skipping budget check.") // Debugging
+        }
+    }
+    
+    private func checkBudget() {
+        if let budget = settingsViewModel.budget, estimatedTotal > budget {
+            alertMessage = "Your total has exceeded your budget of \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")."
+            showAlert = true
         }
     }
 

@@ -12,7 +12,7 @@ import FirebaseFirestore
 
 struct CartSummaryView: View {
     let store: String
-    let cartItems: [(name: String, price: Double)]
+    let cartItems: [(name: String, price: Double, quantity: Int)]
     let subtotal: Double
     let salesTax: Double
     let estimatedTotal: Double
@@ -39,9 +39,15 @@ struct CartSummaryView: View {
             // List of items
             List(cartItems, id: \.name) { item in
                 HStack {
-                    Text(item.name)
+                    VStack(alignment: .leading) {
+                        Text(item.name)
+                            .font(.headline)
+                        Text("Quantity: \(item.quantity)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
                     Spacer()
-                    Text(String(format: "$%.2f", item.price))
+                    Text(String(format: "$%.2f", item.price * Double(item.quantity)) )
                 }
             }
             .listStyle(InsetGroupedListStyle())
@@ -111,7 +117,7 @@ struct CartSummaryView: View {
             id: UUID().uuidString,
             store: store,
             date: Date(),
-            items: cartItems.map { ShoppingSession.CartItem(name: $0.name, quantity: 1, price: $0.price) },
+            items: cartItems.map { ShoppingSession.CartItem(name: $0.name, quantity: $0.quantity, price: $0.price) },
             subtotal: subtotal,
             salesTax: salesTax,
             estimatedTotal: estimatedTotal
