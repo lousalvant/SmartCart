@@ -180,7 +180,13 @@ struct ShoppingView: View {
                         .padding(.horizontal)
                 }
                 .navigationDestination(isPresented: $showCartSummary) {
-                    CartSummaryView()
+                    CartSummaryView(
+                        store: settingsViewModel.storeName,
+                        cartItems: cartItems,
+                        subtotal: subtotal,
+                        salesTax: salesTax,
+                        estimatedTotal: estimatedTotal
+                    )
                 }
             }
             .navigationTitle("Shopping Session")

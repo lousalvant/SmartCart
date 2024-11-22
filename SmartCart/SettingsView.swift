@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 import Firebase
 import FirebaseAuth
 
@@ -83,12 +84,35 @@ class SettingsViewModel: ObservableObject {
     }
     
     // Reset function
-        func reset() {
-            storeName = "Select a Store"
-            budget = nil
-            groceryList.removeAll()
-            newGroceryItem = ""
+    func reset() {
+        storeName = "Select a Store"
+        budget = nil
+        groceryList.removeAll()
+        newGroceryItem = ""
+    }
+    
+    func saveShoppingSession(_ session: ShoppingSession, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let userID = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "AuthError", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not authenticated."])))
+            return
         }
+
+        let db = Firestore.firestore()
+        let document = db.collection("users").document(userID).collection("shoppingSessions").document(session.id)
+
+        do {
+            try document.setData(from: session) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
 }
 
 struct SettingsView: View {
