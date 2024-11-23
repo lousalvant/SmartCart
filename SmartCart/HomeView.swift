@@ -13,9 +13,17 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                Text("Welcome to SmartCart!")
-                    .font(.largeTitle)
-                    .padding(.bottom, 40)
+                Text("SmartCart")
+                    .font(.system(size: 70, weight: .heavy, design: .default))
+                    .padding(.top, 70)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.green, Color.mint],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .padding(.top, 70)
 
                 // Start Shopping Button
                 NavigationLink(destination: SettingsView()) {
@@ -58,7 +66,8 @@ struct HomeView: View {
                 Spacer()
             }
             .padding()
-            .navigationTitle("SmartCart")
+            .navigationBarTitle("") // Clear the title
+            .navigationBarHidden(true)
         }
     }
 }

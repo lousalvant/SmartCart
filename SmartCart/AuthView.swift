@@ -18,9 +18,15 @@ struct AuthView: View {
             VStack {
                 // Custom centered title
                 Text("SmartCart")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.blue)
+                    .font(.system(size: 70, weight: .heavy, design: .default))
+                    .padding(.top, 70)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.green, Color.mint],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .padding(.top, 70)
                 
                 // Spacer to push the title to the top

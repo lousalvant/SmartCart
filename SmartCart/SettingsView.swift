@@ -128,8 +128,15 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Set Up Your Shopping Trip")
-                        .font(.title)
+                        .font(.system(size: 30, weight: .heavy, design: .default))
                         .padding(.top)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.green, Color.mint],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
 
                     // Store Picker
                     VStack(alignment: .leading) {

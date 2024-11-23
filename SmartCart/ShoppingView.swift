@@ -213,29 +213,22 @@ struct ShoppingView: View {
 
     // Add new item to the cart
     private func addItem(name: String, price: Double) {
-        cartItems.append((name: name, price: price, quantity: 1))
-        checkBudget()
-        
-        if let budget = settingsViewModel.budget {
-            print("Budget: \(budget)") // Debugging
-            print("Estimated Total: \(estimatedTotal)") // Debugging
+        cartItems.append((name: name, price: price, quantity: 1)) // Add item to the cart
+        checkBudget() // Check the budget after adding the item
+    }
+    
+    private func checkBudget() {
+        guard let budget = settingsViewModel.budget else { return } // Ensure a budget is set
+
+        if estimatedTotal > budget {
+            alertMessage = "Your total has exceeded your budget of \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")."
             
-            if estimatedTotal > budget {
-                alertMessage = "Your total has exceeded your budget of \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")."
-                print("Budget Exceeded!") // Debugging
+            // Reset and trigger the alert
+            if !showAlert {
                 DispatchQueue.main.async {
                     showAlert = true
                 }
             }
-        } else {
-            print("Budget not set. Skipping budget check.") // Debugging
-        }
-    }
-    
-    private func checkBudget() {
-        if let budget = settingsViewModel.budget, estimatedTotal > budget {
-            alertMessage = "Your total has exceeded your budget of \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")."
-            showAlert = true
         }
     }
 
