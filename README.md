@@ -32,44 +32,64 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 
 ![GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWJ3a3o1ZWtscjl6Z2RnYjk1dDhhdzc3ZHQ0MWZyc25ocXV3bHl3diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UHuGK08lTae5Qnh7sV/giphy.gif)
 
+- [x] User can set the store, budget, and items to a list that they can refer to.
 
-- [ ] User can scan a price tag to capture the item’s price.
-- [ ] User can manually enter the price of an item if scanning is unavailable.
-- [ ] User can view a real-time total of all items in the cart, including tax based on location.
-- [ ] User can set a budget for the shopping trip.
-- [ ] User receives an alert when the total cost is approaching or exceeding their set budget.
+![GIF](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnIxdm95aG8yNGo0OWQ2cmdoYWt6MHU5YWM2bW43cjQ1cWM0ankwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ldz7vGoB7vvDTfxul3/giphy.gif)
+
+- [x] User can scan a price tag to capture the item’s price.
+
+![GIF]()
+
+- [x] User can manually enter the price of an item if scanning is unavailable.
+
+![GIF]()
+
+- [x] User can view a real-time total of all items in the cart, including tax based on location.
+
+![GIF]()
+
+- [x] User can set a budget for the shopping trip.
+
+![GIF]()
+
+- [x] User receives an alert when the total cost is exceeding their set budget.
+
+![GIF]()
 
 **Optional Nice-to-have Stories**
 
-- [ ] User can view a breakdown of items added to the cart, including price, quantity, and tax.
-- [ ] User can categorize items (e.g., groceries, household supplies) for better tracking.
-- [ ] User can save a shopping list and access it during future trips.
-- [ ] User can view a summary of past shopping trips and total expenditures.
-- [ ] User can share their cart total or shopping list with others.
-- [ ] User can apply discounts or coupons to specific items to see updated totals.
+- [x] User can view a breakdown of items added to the cart, including price, quantity, and tax.
+
+![GIF]()
+
+- [x] User can save a shopping list and access it during future trips.
+
+![GIF]()
+
+- [x] User can view a summary of past shopping trips and total expenditures.
+
+![GIF]()
+
 
 ### 2. Screen Archetypes
 
-- [ ] Login Screen / Register Screen
+- [x] Login Screen / Register Screen
 * Required User Feature: User can log in to their account.
 * Required User Feature: User can create a new account.
-- [ ] Home Screen
+- [x] Home Screen
 * Required User Feature: User can view a "Start Shopping" button to access settings for a new shopping session.
 * Optional User Feature: User can navigate to Spending History Screen for a breakdown of grocery spending.
-- [ ] Overall Setting Screen
+- [x] Overall Setting Screen
 * Required User Feature: User can select a specific grocery store.
 * Required User Feature: User can set a budget for the shopping trip.
 * Required User Feature: User can access and modify their grocery list before starting.
-- [ ] Shopping Screen
+- [x] Shopping Screen
 * Required User Feature: User can scan a price tag to capture the item’s price.
 * Required User Feature: User can manually enter the price of an item if scanning is unavailable.
 * Required User Feature: User can view a running total with tax included.
-- [ ] Cart Summary Screen
+- [x] Cart Summary Screen
 * Required User Feature: User can view an itemized list of all items in the cart.
-* Optional Feature: User can view a breakdown of items by category, price, and tax.
-* Optional Feature: User can apply discounts or coupons to items for updated totals.
-* Optional Feature: User can share their cart summary with others.
-- [ ] Spending History Screen
+- [x] Spending History Screen
 * Optional Feature: User can view monthly spending breakdown by category (e.g., groceries, household items).
 * Optional Feature: User can view summaries of past shopping trips and compare spending month-over-month.
 
@@ -79,27 +99,27 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 **Tab Navigation** (Tab to Screen)
 
 
-- [ ] First tab, Home Screen
-- [ ] Second tab, Settings Screen
-- [ ] Third tab, Shopping Screen
-- [ ] Fourth tab, Cart Summary Screen
-- [ ] Fifth tab, Spending History screen
+- [x] First tab, Home Screen
+- [x] Second tab, Settings Screen
+- [x] Third tab, Shopping Screen
+- [x] Fourth tab, Cart Summary Screen
+- [x] Fifth tab, Spending History screen
 
 **Flow Navigation** (Screen to Screen)
 
-- [ ] Login/Sign Up Screen
+- [x] Login/Sign Up Screen
   * Leads to Home Screen after successful login/sign up.
-- [ ] Home Screen
+- [x] Home Screen
   * Leads to Settings Screen (to set budget, list, and store) through a "Start Shopping" button.
   * Leads to Spending History Screen to view the breakdown of overall grocery spending
-- [ ] Settings Screen
+- [x] Settings Screen
 * Leads to Shopping Screen after the user sets the store, budget, and grocery list
-- [ ] Shopping Screen
+- [x] Shopping Screen
 * Leads to Scan/Manual entry screen
 * Leads to Cart Summary Screen after adding items to the cart
-- [ ] Cart Summary Screen
+- [x] Cart Summary Screen
 * Leads back to Home Screen after viewing the itemized cart breakdown
-- [ ] Spending History Screen
+- [x] Spending History Screen
 * Leads back to Home Screen after reviewing monthly and overall grocery spending
 
 

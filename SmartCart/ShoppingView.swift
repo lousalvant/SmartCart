@@ -242,10 +242,21 @@ struct ShoppingView: View {
         print("Scanned Data: \(scannedData)") // Debugging
 
         for (index, line) in scannedData.enumerated() {
+            // Check if the line contains a price
             if let priceMatch = line.range(of: "\\$?\\d+(\\.\\d{2})?", options: .regularExpression) {
                 let priceString = String(line[priceMatch]).replacingOccurrences(of: "$", with: "")
-                let itemName = (index + 1 < scannedData.count) ? scannedData[index + 1].trimmingCharacters(in: .whitespacesAndNewlines) : "Unknown Item"
-                
+
+                // Check for item name before or after the price
+                var itemName = "Unknown Item"
+                if index > 0 {
+                    // Check the line before the price
+                    itemName = scannedData[index - 1].trimmingCharacters(in: .whitespacesAndNewlines)
+                } else if index + 1 < scannedData.count {
+                    // Check the line after the price
+                    itemName = scannedData[index + 1].trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+
+                // Add the item if the price can be parsed
                 if let price = Double(priceString) {
                     addItem(name: itemName, price: price)
                     return
