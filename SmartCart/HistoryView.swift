@@ -15,55 +15,48 @@ struct HistoryView: View {
     @State private var totalWeek: Double = 0.0
     @State private var totalMonth: Double = 0.0
     @State private var totalYear: Double = 0.0
-    @State private var showSessionDetail: Bool = false
     @State private var selectedSession: ShoppingSession? // Selected session to view details
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Spending Overview")
-                .font(.title)
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Spending Overview")
+                    .font(.title)
+                    .padding(.horizontal)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("This Week: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalWeek)) ?? "$0.00")")
+                    Text("This Month: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalMonth)) ?? "$0.00")")
+                    Text("This Year: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalYear)) ?? "$0.00")")
+                }
                 .padding(.horizontal)
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("This Week: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalWeek)) ?? "$0.00")")
-                Text("This Month: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalMonth)) ?? "$0.00")")
-                Text("This Year: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: totalYear)) ?? "$0.00")")
-            }
-            .padding(.horizontal)
+                Divider()
 
-            Divider()
+                Text("Shopping Sessions")
+                    .font(.headline)
+                    .padding(.horizontal)
 
-            Text("Shopping Sessions")
-                .font(.headline)
-                .padding(.horizontal)
-
-            List(shoppingSessions) { session in
-                Button(action: {
-                    selectedSession = session
-                    showSessionDetail = true
-                }) {
-                    VStack(alignment: .leading) {
-                        Text(session.store)
-                            .font(.headline)
-                        Text("Date: \(session.date.formatted(date: .abbreviated, time: .omitted))")
-                            .font(.subheadline)
-                        Text("Total: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: session.estimatedTotal)) ?? "$0.00")")
-                            .font(.subheadline)
+                List(shoppingSessions) { session in
+                    NavigationLink(destination: ShoppingSessionDetailView(session: session)) {
+                        VStack(alignment: .leading) {
+                            Text(session.store)
+                                .font(.headline)
+                            Text("Date: \(session.date.formatted(date: .abbreviated, time: .omitted))")
+                                .font(.subheadline)
+                            Text("Total: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: session.estimatedTotal)) ?? "$0.00")")
+                                .font(.subheadline)
+                        }
                     }
                 }
-            }
-            .listStyle(InsetGroupedListStyle())
+                .listStyle(InsetGroupedListStyle())
 
-            Spacer()
-        }
-        .navigationTitle("History")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            fetchShoppingSessions()
-        }
-        .sheet(isPresented: $showSessionDetail) {
-            if let session = selectedSession {
-                ShoppingSessionDetailView(session: session)
+                Spacer()
+            }
+            .navigationTitle("History")
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                fetchShoppingSessions()
             }
         }
     }

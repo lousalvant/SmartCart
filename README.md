@@ -34,41 +34,35 @@ SmartCart helps shoppers stay on budget by allowing them to scan price tags or e
 
 - [x] User can set the store, budget, and items to a list that they can refer to.
 
-![GIF](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnIxdm95aG8yNGo0OWQ2cmdoYWt6MHU5YWM2bW43cjQ1cWM0ankwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ldz7vGoB7vvDTfxul3/giphy.gif)
+![GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWVmN2Y0Y2dlajg5NWlvcm9qMndubGM3MW5sZm9ubWdpeDVxaXR6diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9gkiubRmOV8kK44IPe/giphy.gif)
 
 - [x] User can scan a price tag to capture the item’s price.
 
-![GIF]()
+![GIF](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTNzb3p5Ymt6OXdyOTRtNXBzYXNmdHl2MDU2eDM0M2RhZGxuY2thbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RiGh5BBs3Pdf5hPoJJ/giphy.gif)
 
 - [x] User can manually enter the price of an item if scanning is unavailable.
 
-![GIF]()
+![GIF](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2s5b3hsbHQ1dWlmZmRnOGVhc3k4bmx2dGgzZmR1bHdiNmJxdGV0NiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/zRR2tKQLWgq9Z7f9Im/giphy.gif)
 
 - [x] User can view a real-time total of all items in the cart, including tax based on location.
 
-![GIF]()
-
-- [x] User can set a budget for the shopping trip.
-
-![GIF]()
-
 - [x] User receives an alert when the total cost is exceeding their set budget.
 
-![GIF]()
+![GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnF1emRlbXJocDg0NTg5cGIwbG90d3o5N3Bwamt3aTZ4bHlueHUxbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oRIc9iuyfc2erln0hZ/giphy.gif)
 
 **Optional Nice-to-have Stories**
 
 - [x] User can view a breakdown of items added to the cart, including price, quantity, and tax.
 
-![GIF]()
+![GIF](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmdwdDFzNzdhOWJkenNoeHp6amJ2eHlhZjJ1cXpjMmFpbWdrMTA4aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UA4SPzhsfjmtZd69hl/giphy.gif)
 
 - [x] User can save a shopping list and access it during future trips.
 
-![GIF]()
+![GIF](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2NtOHBtaGx4NDRxZWNhN2c1eWpoYzdpMXhmMHVvZHN5cjl5aGsyciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KgHB6IgJZjOIpIqmfe/giphy.gif)
 
 - [x] User can view a summary of past shopping trips and total expenditures.
 
-![GIF]()
+![GIF](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGdrcnRndWV5ZjUzMjB1bnh1ZG0yZGNtNzlzYW41emhkOWxlbmplMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xIx9RY2yR1tyGFmo47/giphy.gif)
 
 
 ### 2. Screen Archetypes
