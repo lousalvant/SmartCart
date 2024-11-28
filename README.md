@@ -9,6 +9,10 @@
 
 ## Overview
 
+### Video Demonstration
+
+https://youtu.be/3fqfwmKyoAE
+
 ### Description
 
 SmartCart helps shoppers stay on budget by allowing them to scan price tags or enter in the price manually as they shop, providing a real-time total with sales tax based on location. Shoppers can set a budget, and CartCheck will alert them if they’re close to exceeding it, making it easy to avoid checkout surprises and stay on track.
