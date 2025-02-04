@@ -10,6 +10,7 @@ import CoreLocation
 
 struct ShoppingView: View {
     @EnvironmentObject var settingsViewModel: SettingsViewModel // Access SettingsViewModel
+    @Binding var navigationPath: NavigationPath
     @State private var cartItems: [(name: String, price: Double, quantity: Int)] = [] // Track items in the cart with price
     @State private var showItemEntrySheet = false // Show sheet for manual item entry
     @State private var showCartSummary = false // Control navigation to CartSummaryView
@@ -38,176 +39,170 @@ struct ShoppingView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                // Location, Tax Rate, and Store at the top
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Location: \(cityState)")
+        VStack(alignment: .leading, spacing: 20) {
+            // Location, Tax Rate, and Store at the top
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Location: \(cityState)")
+                    .font(.headline)
+                Text("Sales Tax: \(String(format: "%.2f", taxRate))%")
+                    .font(.headline)
+                Text("Store: \(settingsViewModel.storeName)")
+                    .font(.headline)
+                                
+                if let budget = settingsViewModel.budget {
+                    Text("Budget: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")")
                         .font(.headline)
-                    Text("Sales Tax: \(String(format: "%.2f", taxRate))%")
+                } else {
+                    Text("Budget: Not Set")
                         .font(.headline)
-                    Text("Store: \(settingsViewModel.storeName)")
-                        .font(.headline)
-                                    
-                    if let budget = settingsViewModel.budget {
-                        Text("Budget: \(settingsViewModel.currencyFormatter.string(from: NSNumber(value: budget)) ?? "$0.00")")
+                }
+            }
+            .padding()
+
+            Divider()
+
+            // Section for the cart
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Your Cart")
+                    .font(.title2)
+                    .bold()
+                
+                // Display items in the cart
+                List {
+                    ForEach(cartItems.indices, id: \.self) { index in
+                        HStack {
+                            Text(cartItems[index].name)
+                            Spacer()
+                            Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: cartItems[index].price)) ?? "$0.00")
+                            Spacer()
+                            Stepper(value: $cartItems[index].quantity, in: 1...99) {
+                                Text("Qty: \(cartItems[index].quantity)")
+                            }
+                            .onChange(of: cartItems[index].quantity) { _ in
+                                checkBudget() // Recalculate totals and check budget on quantity change
+                            }
+                        }
+                    }
+                    .onDelete(perform: deleteItem)
+                }
+                .frame(height: 200) // Limit height of the cart list
+                
+                // Subtotal, Sales Tax, and Estimated Total
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack {
+                        Text("Subtotal:")
+                        Spacer()
+                        Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: subtotal)) ?? "$0.00")
+                    }
+                    HStack {
+                        Text("Sales Tax:")
+                        Spacer()
+                        Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: salesTax)) ?? "$0.00")
+                    }
+                    HStack {
+                        Text("Est. Total:")
+                            .bold()
+                        Spacer()
+                        Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: estimatedTotal)) ?? "$0.00")
+                            .bold()
+                    }
+                }
+                .padding(.horizontal)
+                
+                HStack(spacing: 10) {
+                    // Add item button
+                    Button(action: {
+                        showItemEntrySheet = true
+                    }) {
+                        Text("Enter Item")
                             .font(.headline)
-                    } else {
-                        Text("Budget: Not Set")
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                    
+                    // Scan item button
+                    Button(action: {
+                        showScanner = true
+                    }) {
+                        Text("Scan Item")
                             .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.orange)
+                            .cornerRadius(10)
+                    }
+                    
+                    // View list button
+                    Button(action: {
+                        showGroceryListSheet = true
+                    }) {
+                        Text("View List")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.purple)
+                            .cornerRadius(10)
                     }
                 }
                 .padding()
+                .frame(maxWidth: .infinity)
+                .sheet(isPresented: $showItemEntrySheet) {
+                    ItemEntryView { itemName, itemPrice in
+                        addItem(name: itemName, price: itemPrice)
+                    }
+                }
+                .sheet(isPresented: $showScanner) {
+                    ScannerView { result in
+                        switch result {
+                        case .success(let scannedData):
+                            parseScannedData(scannedData)
+                        case .failure(let error):
+                            print("Scanning failed: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showGroceryListSheet) {
+                    ViewGroceryListSheet(groceryList: settingsViewModel.groceryList)
+                }
+            }
 
-                Divider()
+            Spacer()
 
-                // Section for the cart
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Your Cart")
-                        .font(.title2)
-                        .bold()
-                    
-                    // Display items in the cart
-                    List {
-                        ForEach(cartItems.indices, id: \.self) { index in
-                            HStack {
-                                Text(cartItems[index].name)
-                                Spacer()
-                                Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: cartItems[index].price)) ?? "$0.00")
-                                Spacer()
-                                Stepper(value: $cartItems[index].quantity, in: 1...99) {
-                                    Text("Qty: \(cartItems[index].quantity)")
-                                }
-                                .onChange(of: cartItems[index].quantity) { _ in
-                                    checkBudget() // Recalculate totals and check budget on quantity change
-                                }
-                            }
-                        }
-                        .onDelete(perform: deleteItem)
-                    }
-                    .frame(height: 200) // Limit height of the cart list
-                    
-                    // Subtotal, Sales Tax, and Estimated Total
-                    VStack(alignment: .leading, spacing: 5) {
-                        HStack {
-                            Text("Subtotal:")
-                            Spacer()
-                            Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: subtotal)) ?? "$0.00")
-                        }
-                        HStack {
-                            Text("Sales Tax:")
-                            Spacer()
-                            Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: salesTax)) ?? "$0.00")
-                        }
-                        HStack {
-                            Text("Est. Total:")
-                                .bold()
-                            Spacer()
-                            Text(settingsViewModel.currencyFormatter.string(from: NSNumber(value: estimatedTotal)) ?? "$0.00")
-                                .bold()
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    HStack(spacing: 10) {
-                        // Add item button
-                        Button(action: {
-                            showItemEntrySheet = true
-                        }) {
-                            Text("Enter Item")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.blue)
-                                .cornerRadius(10)
-                        }
-                        
-                        // Scan item button
-                        Button(action: {
-                            showScanner = true
-                        }) {
-                            Text("Scan Item")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.orange)
-                                .cornerRadius(10)
-                        }
-                        
-                        // View list button
-                        Button(action: {
-                            showGroceryListSheet = true
-                        }) {
-                            Text("View List")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.purple)
-                                .cornerRadius(10)
-                        }
-                    }
+            // Finished button at the bottom
+            NavigationLink(destination: CartSummaryView(
+                store: settingsViewModel.storeName,
+                cartItems: cartItems.map { ($0.name, $0.price, $0.quantity) },
+                subtotal: subtotal,
+                salesTax: salesTax,
+                estimatedTotal: estimatedTotal,
+                navigationPath: $navigationPath
+            )) {
+                Text("Finished")
+                    .font(.headline)
+                    .foregroundColor(.white)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .sheet(isPresented: $showItemEntrySheet) {
-                        ItemEntryView { itemName, itemPrice in
-                            addItem(name: itemName, price: itemPrice)
-                        }
-                    }
-                    .sheet(isPresented: $showScanner) {
-                        ScannerView { result in
-                            switch result {
-                            case .success(let scannedData):
-                                parseScannedData(scannedData)
-                            case .failure(let error):
-                                print("Scanning failed: \(error.localizedDescription)")
-                            }
-                        }
-                    }
-                    .sheet(isPresented: $showGroceryListSheet) {
-                        ViewGroceryListSheet(groceryList: settingsViewModel.groceryList)
-                    }
-                }
-
-                Spacer()
-
-                // Finished button at the bottom
-                Button(action: {
-                    showCartSummary = true
-                }) {
-                    Text("Finished")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-                .navigationDestination(isPresented: $showCartSummary) {
-                    CartSummaryView(
-                        store: settingsViewModel.storeName,
-                        cartItems: cartItems.map { ($0.name, $0.price, $0.quantity) },
-                        subtotal: subtotal,
-                        salesTax: salesTax,
-                        estimatedTotal: estimatedTotal
-                    )
-                }
+                    .background(Color.green)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
             }
-            .navigationTitle("Shopping Session")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                configureLocationManager()
-            }
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("Budget Exceeded!"),
-                    message: Text(alertMessage),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
+        }
+        .navigationTitle("Shopping Session")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            configureLocationManager()
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Budget Exceeded!"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 

@@ -9,9 +9,10 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var authViewModel: AuthViewModel // Access AuthViewModel
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $navigationPath) {
             VStack(spacing: 20) {
                 Text("SmartCart")
                     .font(.system(size: 70, weight: .heavy, design: .default))
@@ -26,7 +27,7 @@ struct HomeView: View {
                     .padding(.top, 70)
 
                 // Start Shopping Button
-                NavigationLink(destination: SettingsView()) {
+                NavigationLink(destination: SettingsView(navigationPath: $navigationPath)) {
                     Text("Start Shopping")
                         .font(.headline)
                         .foregroundColor(.white)

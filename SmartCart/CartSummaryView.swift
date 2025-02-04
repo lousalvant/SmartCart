@@ -19,7 +19,7 @@ struct CartSummaryView: View {
     
     @EnvironmentObject var settingsViewModel: SettingsViewModel
     @Environment(\.dismiss) var dismiss // Used to navigate back to HomeView
-
+    @Binding var navigationPath: NavigationPath
     @State private var isSaving = false // To show a loading indicator or disable the button if needed
     @State private var saveError: String? // To handle errors if saving fails
 
@@ -128,7 +128,9 @@ struct CartSummaryView: View {
             switch result {
             case .success:
                 print("Shopping session saved successfully!")
-                dismiss()
+                DispatchQueue.main.async {
+                    navigationPath = NavigationPath() // Correctly resets the navigation stack
+                }
             case .failure(let error):
                 print("Error saving session: \(error.localizedDescription)")
                 saveError = error.localizedDescription

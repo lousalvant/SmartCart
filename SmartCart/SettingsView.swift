@@ -118,161 +118,149 @@ class SettingsViewModel: ObservableObject {
 struct SettingsView: View {
     @EnvironmentObject var viewModel: SettingsViewModel
     @Environment(\.presentationMode) var presentationMode
+    @Binding var navigationPath: NavigationPath
     @State private var showShoppingView = false
     @State private var showSavedListsSheet = false // Control sheet presentation
     @State private var showAlert = false
     @State private var alertMessage = ""
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Set Up Your Shopping Trip")
-                        .font(.system(size: 30, weight: .heavy, design: .default))
-                        .padding(.top)
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Color.green, Color.mint],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Set Up Your Shopping Trip")
+                    .font(.system(size: 30, weight: .heavy, design: .default))
+                    .padding(.top)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.green, Color.mint],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                // Store Picker
+                VStack(alignment: .leading) {
+                    Text("Select Store")
+                        .font(.headline)
+                        .padding(.horizontal)
+
+                    Picker("Select a Store", selection: $viewModel.storeName) {
+                        ForEach(viewModel.storeOptions, id: \.self) { store in
+                            Text(store)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                    .padding(.horizontal)
+                }
+
+                // Budget
+                VStack(alignment: .leading) {
+                    Text("Budget")
+                        .font(.headline)
+                        .padding(.horizontal)
+
+                    HStack {
+                        Text("$") // Prefix text
+                            .font(.headline)
+                        TextField(
+                            "Enter Budget",
+                            text: Binding(
+                                get: {
+                                    viewModel.budget != nil ? String(format: "%.2f", viewModel.budget!) : ""
+                                },
+                                set: { newValue in
+                                    if let value = Double(newValue.filter { "0123456789.".contains($0) }) {
+                                        viewModel.budget = value
+                                    } else {
+                                        viewModel.budget = nil
+                                    }
+                                }
                             )
                         )
-
-                    // Store Picker
-                    VStack(alignment: .leading) {
-                        Text("Select Store")
-                            .font(.headline)
-                            .padding(.horizontal)
-
-                        Picker("Select a Store", selection: $viewModel.storeName) {
-                            ForEach(viewModel.storeOptions, id: \.self) { store in
-                                Text(store)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        .padding(.horizontal)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
+                    .padding(.horizontal)
+                }
 
-                    // Budget
-                    VStack(alignment: .leading) {
-                        Text("Budget")
-                            .font(.headline)
-                            .padding(.horizontal)
+                // View Saved Lists Button
+                Button(action: {
+                    showSavedListsSheet = true
+                    viewModel.fetchSavedGroceryLists() // Fetch lists when the sheet is about to show
+                }) {
+                    Text("View Saved Lists")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                .sheet(isPresented: $showSavedListsSheet) {
+                    SavedListsView(viewModel: viewModel)
+                }
 
-                        HStack {
-                            Text("$") // Prefix text
-                                .font(.headline)
-                            TextField(
-                                "Enter Budget",
-                                text: Binding(
-                                    get: {
-                                        viewModel.budget != nil ? String(format: "%.2f", viewModel.budget!) : ""
-                                    },
-                                    set: { newValue in
-                                        if let value = Double(newValue.filter { "0123456789.".contains($0) }) {
-                                            viewModel.budget = value
-                                        } else {
-                                            viewModel.budget = nil
-                                        }
-                                    }
-                                )
-                            )
-                            .keyboardType(.decimalPad)
+                // Grocery List
+                VStack(alignment: .leading) {
+                    Text("Grocery List")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    
+                    HStack {
+                        TextField("Add Item", text: $viewModel.newGroceryItem)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                        Button(action: addItem) {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(.blue)
                         }
-                        .padding(.horizontal)
                     }
+                    .padding(.horizontal)
+                    
+                    List {
+                        ForEach(viewModel.groceryList, id: \.self) { item in
+                            Text(item)
+                        }
+                        .onDelete(perform: deleteItem)
+                    }
+                    .frame(height: 200) // Restrict List height for better scrolling
 
-                    // View Saved Lists Button
-                    Button(action: {
-                        showSavedListsSheet = true
-                        viewModel.fetchSavedGroceryLists() // Fetch lists when the sheet is about to show
-                    }) {
-                        Text("View Saved Lists")
+                    Button(action: viewModel.clearGroceryList) {
+                        Text("Clear List")
                             .font(.subheadline)
-                            .foregroundColor(.blue)
+                            .foregroundColor(.red)
                             .padding()
                             .frame(maxWidth: .infinity)
                             .background(Color(.systemGray6))
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
-                    .sheet(isPresented: $showSavedListsSheet) {
-                        SavedListsView(viewModel: viewModel)
-                    }
-
-                    // Grocery List
-                    VStack(alignment: .leading) {
-                        Text("Grocery List")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        
-                        HStack {
-                            TextField("Add Item", text: $viewModel.newGroceryItem)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            Button(action: addItem) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        List {
-                            ForEach(viewModel.groceryList, id: \.self) { item in
-                                Text(item)
-                            }
-                            .onDelete(perform: deleteItem)
-                        }
-                        .frame(height: 200) // Restrict List height for better scrolling
-
-                        Button(action: viewModel.clearGroceryList) {
-                            Text("Clear List")
-                                .font(.subheadline)
-                                .foregroundColor(.red)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(10)
-                        }
-                        .padding(.horizontal)
-                    }
-
-                    Spacer()
-
-                    // Start Shopping Button
-                    Button(action: {
-                        if let budget = viewModel.budget, budget > 0 {
-                            viewModel.saveGroceryList()
-                            showShoppingView = true
-                        } else {
-                            alertMessage = "Please set a budget before starting your shopping session."
-                            showAlert = true
-                        }
-                    }) {
-                        Text("Start Shopping")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                            .padding(.horizontal)
-                    }
-                    .navigationDestination(isPresented: $showShoppingView) {
-                        ShoppingView()
-                    }
-                    .alert(isPresented: $showAlert) {
-                        Alert(
-                            title: Text("Missing Budget"),
-                            message: Text(alertMessage),
-                            dismissButton: .default(Text("OK"))
-                        )
-                    }
                 }
-                .padding()
-                .onAppear {
-                    viewModel.reset() // Reset settings when view appears
+
+                Spacer()
+
+                // Start Shopping Button
+                NavigationLink(destination: ShoppingView(navigationPath: $navigationPath)) {
+                    Text("Start Shopping")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
                 }
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Missing Budget"),
+                        message: Text(alertMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
+            }
+            .padding()
+            .onAppear {
+                viewModel.reset() // Reset settings when view appears
             }
         }
     }
